@@ -1,3 +1,3 @@
 # ChainlinkKeepersAutomation
 
-Automation contracts with Chainlink Keepers. 
+Automation applications with Chainlink Keepers. 
