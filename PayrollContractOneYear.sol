@@ -19,7 +19,7 @@ contract PayrollContractOneYear is KeeperCompatibleInterface {
     }
 
     function OwnerAddFundsEveryYear() public payable ContractOwnerCheck {
-        require(msg.value == 2, "You need to have msg.value as 2 to payout worker biweekly!"); //112 = (56 weeks * 2 weeks/month * 1 WEI/month)
+        require(msg.value == 2, "You need to have msg.value as 2 to payout worker biweekly!"); //24 = (12 months * 2 time/month * 1 WEI/time)
     }
 
     function checkUpkeep(bytes calldata) external override returns (bool upkeepNeeded, bytes memory) {
