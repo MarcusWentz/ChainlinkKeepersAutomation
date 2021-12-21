@@ -24,7 +24,7 @@ contract PayrollContractOneYear is KeeperCompatibleInterface {
 
     function checkUpkeep(bytes calldata) external override returns (bool upkeepNeeded, bytes memory) {
         require(address(this).balance > 0,"No funds in contract yet from Owner.");
-        upkeepNeeded = (block.timestamp - lastTimeStamp) > 30; //Block every 30 seconds minimum. Full year:  = (14 days*86400 seconds)
+        upkeepNeeded = (block.timestamp - lastTimeStamp) > 30; //Block every 30 seconds minimum. Full year: 1209600 = (14 days*86400 seconds)
     }
 
     function performUpkeep(bytes calldata) external override {
