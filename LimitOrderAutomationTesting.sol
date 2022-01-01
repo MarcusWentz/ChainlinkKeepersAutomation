@@ -106,30 +106,34 @@ contract LimitOrdersMATIC_DAI {
         _;
     }
 
-    function CreateDAILimitOrder() public payable ContractOwnerCheck {
+    function LimitSellMATIC() public payable ContractOwnerCheck {
         require(msg.value == 1, "You need to have msg.value as 1!"); //24 = (12 months * 2 time/month * 1 WEI/time)
     }
-    function CreateMATICLimitOrder() public ContractOwnerCheck {
+    function LimitBuyMATIC() public ContractOwnerCheck {
         require(tokenObject.balanceOf(address(msg.sender)) >= 2, "Must have 2 LINK for pool creation!");
         require(tokenObject.allowance(msg.sender,address(this)) >= 2, "Must allow 2 tokens from your wallet in the ERC20 contract!");
         tokenObject.transferFrom(msg.sender, address(this), 2); //NEED TO APPROVE EVERY TIME BEFORE YOU SEND LINK FROM THE ERC20 CONTRACT!
         tokenObject.approve(addressdexOrderBookDAI,2);
     }
 
-    function CancelDAILimitOrder() public ContractOwnerCheck {
+    function ClaimAllMATIC() public ContractOwnerCheck {
         require(address(this).balance > 0,"No MATIC in contract yet from Owner.");
         payable(msg.sender).transfer(1); 
     }
-    function CancelMATICLimitOrder() public ContractOwnerCheck{
+    function ClaimAllDAI() public ContractOwnerCheck{
         require(tokenObject.balanceOf(address(this)) > 0, "No DAI in contract yet from Owner.");
         tokenObject.transfer(msg.sender, 2); // 2 LINK from contract to user
     }
 
-    function SwapMATICforDAI() public ContractOwnerCheck {
-        dexOrderBookDAI.swapMATICforDAI{value: 1}();
-    }
-    function SwapDAIforMATIC() public ContractOwnerCheck {
-        dexOrderBookDAI.swapDAIforMATIC();
+    function AutomateSwaps() public ContractOwnerCheck {
+        require(address(this).balance > 0 || tokenObject.balanceOf(address(this)) > 0, "No DAI or MATIC limit order opened yet,");
+        require(dexOrderBookDAI.getLatestMATICPrice() == 2 || dexOrderBookDAI.getLatestMATICPrice() == 3, "MATIC MUST BE 2 or 3 DAI TO DO THIS!");
+        if(dexOrderBookDAI.getLatestMATICPrice() == 2) {
+            dexOrderBookDAI.swapDAIforMATIC();
+        }
+        if(dexOrderBookDAI.getLatestMATICPrice() == 3 ){
+            dexOrderBookDAI.swapMATICforDAI{value: 1}();
+        }
     }
 
     function getMaticBalance() public view returns (uint) {
