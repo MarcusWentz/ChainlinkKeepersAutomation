@@ -2,8 +2,8 @@
 pragma solidity 0.8.11;
 
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
-import "https://github.com/smartcontractkit/chainlink/blob/develop/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
-// import "@chainlink/contracts/src/v0.8/KeeperCompatible.sol";
+import "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
+import "@chainlink/contracts/src/v0.8/KeeperCompatible.sol";
 
 contract ERC20TokenContract is ERC20('Dummy ERC20', 'DERC20') {}
 
@@ -82,8 +82,7 @@ contract DEXOrderBookDAI {
 
 }
 
-// contract LimitOrderMATICForDAI is KeeperCompatibleInterface {
-contract LimitOrdersMATIC_DAI {
+contract LimitOrdersMATIC_DAI is KeeperCompatibleInterface{
 
     address public immutable Owner;
     address public immutable addressdexOrderBookDAI;
@@ -125,17 +124,6 @@ contract LimitOrdersMATIC_DAI {
         tokenObject.transfer(msg.sender, 2); // 2 LINK from contract to user
     }
 
-    function AutomateSwaps() public ContractOwnerCheck {
-        require(address(this).balance > 0 || tokenObject.balanceOf(address(this)) > 0, "No DAI or MATIC limit order opened yet,");
-        require(dexOrderBookDAI.getLatestMATICPrice() == 2 || dexOrderBookDAI.getLatestMATICPrice() == 3, "MATIC MUST BE 2 or 3 DAI TO DO THIS!");
-        if(dexOrderBookDAI.getLatestMATICPrice() == 2) {
-            dexOrderBookDAI.swapDAIforMATIC();
-        }
-        if(dexOrderBookDAI.getLatestMATICPrice() == 3 ){
-            dexOrderBookDAI.swapMATICforDAI{value: 1}();
-        }
-    }
-
     function getMaticBalance() public view returns (uint) {
         return address(this).balance;
     }
@@ -143,13 +131,17 @@ contract LimitOrdersMATIC_DAI {
         return tokenObject.balanceOf(address(this));
     }
 
-    // // function checkUpkeep(bytes calldata) LimitOrderExists external override returns (bool upkeepNeeded, bytes memory) {
-    // //     require(true, "Value matches limit order.");
-    // //     require(address(0x66C1d8A5ee726b545576A75380391835F8AAA43c).balance == 1*(10**18),"Not enough funds in pool to swap.");
-    // //     upkeepNeeded = true; 
-    // // }
-
-    // function performUpkeep(bytes calldata) external override {
-    //     swapContract.swapDAIforMATIC();
-    // }
+    function checkUpkeep(bytes calldata) external override returns (bool upkeepNeeded, bytes memory) {
+        require(address(this).balance > 0 || tokenObject.balanceOf(address(this)) > 0, "No DAI or MATIC limit order opened yet,");
+        require(dexOrderBookDAI.getLatestMATICPrice() == 2 || dexOrderBookDAI.getLatestMATICPrice() == 3, "MATIC MUST BE 2 or 3 DAI TO DO THIS!");
+        upkeepNeeded = true; 
+    }
+    function performUpkeep(bytes calldata) external override {
+        if(dexOrderBookDAI.getLatestMATICPrice() == 2) {
+            dexOrderBookDAI.swapDAIforMATIC();
+        }
+        if(dexOrderBookDAI.getLatestMATICPrice() == 3 ){
+            dexOrderBookDAI.swapMATICforDAI{value: 1}();
+        }
+    }
 }
