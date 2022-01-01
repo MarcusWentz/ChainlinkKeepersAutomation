@@ -63,8 +63,8 @@ contract DEXOrderBookDAI {
 // contract LimitOrderMATICForDAI is KeeperCompatibleInterface {
 contract LimitOrderMATICForDAI {
 
-    uint public lastTimeStamp;
     address public immutable Owner;
+    address public immutable addressdexOrderBookDAI;
     DEXOrderBookDAI public dexOrderBookDAI;
 
     address public DERC20TokenAddressMatic = 0xfe4F5145f6e09952a5ba9e956ED0C25e3Fa4c7F1; //LET 1 DERC20 = 1 DAI
@@ -74,6 +74,7 @@ contract LimitOrderMATICForDAI {
     receive() external payable {}  //NEEDED FOR ACCEPTING INCOMING MATIC WITH EMPTY CALL DATA.
 
     constructor(address _dexOrderBookDAI) {
+        addressdexOrderBookDAI= _dexOrderBookDAI;
         Owner = msg.sender;
         dexOrderBookDAI = DEXOrderBookDAI(_dexOrderBookDAI);
     }
@@ -104,10 +105,11 @@ contract LimitOrderMATICForDAI {
         tokenObject.transfer(msg.sender, 2); // 2 LINK from contract to user
     }
 
-    function SwapMATICforDAI() public payable ContractOwnerCheck {
+    function SwapMATICforDAI() public ContractOwnerCheck {
         dexOrderBookDAI.swapMATICforDAI{value: 1}();
     }
     function SwapDAIforMATIC() public ContractOwnerCheck {
+        tokenObject.approve(addressdexOrderBookDAI,3);
         dexOrderBookDAI.swapDAIforMATIC();
     }
 
