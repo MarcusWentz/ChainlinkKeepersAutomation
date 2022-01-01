@@ -2,6 +2,7 @@
 pragma solidity 0.8.11;
 
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import "https://github.com/smartcontractkit/chainlink/blob/develop/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
 // import "@chainlink/contracts/src/v0.8/KeeperCompatible.sol";
 
 contract ERC20TokenContract is ERC20('Dummy ERC20', 'DERC20') {}
@@ -9,9 +10,30 @@ contract ERC20TokenContract is ERC20('Dummy ERC20', 'DERC20') {}
 contract DEXOrderBookDAI {
 
     address public immutable Owner;
+    uint public mockMATICpricefeedValue;
+    AggregatorV3Interface internal priceFeedMATIC;
 
     constructor() {
         Owner = msg.sender;
+        priceFeedMATIC = AggregatorV3Interface(0xd0D5e3DB44DE05E9F294BB0a3bEEaF030DE24Ada);
+    }
+
+    // function getLatestMATICPrice() public view returns (uint) {  // FOR PRODUCTION
+    // (
+    //     uint80 roundID, int price, uint startedAt, uint timeStamp, uint80 answeredInRound) = priceFeedMATIC.latestRoundData();
+    //     return uint(price*(10**10));
+    // }
+
+    function setForBuyingMATIC() public {
+        mockMATICpricefeedValue = 2;
+    }
+
+    function setForSellingMATIC() public {
+        mockMATICpricefeedValue = 3;
+    }
+
+    function getLatestMATICPrice() public view returns (uint) {
+         return mockMATICpricefeedValue;
     }
 
     modifier ContractOwnerCheck() {
