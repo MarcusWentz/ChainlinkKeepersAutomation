@@ -27,7 +27,6 @@ contract DEXOrderBookDAI {
         require(tokenObject.allowance(Owner,address(this)) >= 3, "Must allow 3 tokens from your wallet in the ERC20 contract!");
         tokenObject.transferFrom(Owner, address(this), 3); //NEED TO APPROVE EVERY TIME BEFORE YOU SEND LINK FROM THE ERC20 CONTRACT!
     }
-
     function addMATICToPool() ContractOwnerCheck public payable{
         require(msg.value == 1, "You need to have msg.value as 2 to payout worker biweekly!"); //24 = (12 months * 2 time/month * 1 WEI/time)
     }
@@ -35,7 +34,6 @@ contract DEXOrderBookDAI {
     function removeDAIFromPool() ContractOwnerCheck public {
          tokenObject.transfer(msg.sender, 3); // 2 LINK from contract to user
     }
-    
     function removeMATICFromPool() ContractOwnerCheck public {
         payable(msg.sender).transfer(1); 
     }
@@ -45,7 +43,6 @@ contract DEXOrderBookDAI {
         require(msg.value == 1, "MSG.VALUE ERROR");
         tokenObject.transfer(msg.sender, 3); // 2 LINK from contract to user
     }
-
     function swapDAIforMATIC() public {
         require(address(this).balance > 0,"No funds in contract yet from Owner.");
         require(tokenObject.balanceOf(address(Owner)) >= 3, "Must have 3*10^-18 LINK for pool creation!");
@@ -57,7 +54,6 @@ contract DEXOrderBookDAI {
     function getDAIBalance() public view returns (uint) {
         return tokenObject.balanceOf(address(this));
     }
-
     function getMaticBalance() public view returns (uint) {
         return address(this).balance;
     }
@@ -75,6 +71,7 @@ contract LimitOrderMATICForDAI {
     ERC20TokenContract tokenObject = ERC20TokenContract(DERC20TokenAddressMatic);
 
     fallback() external payable {} //NEEDED FOR ACCEPTING INCOMING MATIC.
+    receive() external payable {}  //NEEDED FOR ACCEPTING INCOMING MATIC WITH EMPTY CALL DATA.
 
     constructor(address _dexOrderBookDAI) {
         Owner = msg.sender;
@@ -94,31 +91,29 @@ contract LimitOrderMATICForDAI {
     function CreateDAILimitOrder() public payable ContractOwnerCheck {
         require(msg.value == 1, "You need to have msg.value as 2 to payout worker biweekly!"); //24 = (12 months * 2 time/month * 1 WEI/time)
     }
-
-    // function CreateDAILimitOrder() public payable ContractOwnerCheck {
-    //     require(msg.value == 1, "You need to have msg.value as 2 to payout worker biweekly!"); //24 = (12 months * 2 time/month * 1 WEI/time)
-    // }
+    function CreateMATICLimitOrder() public ContractOwnerCheck {
+        require(tokenObject.balanceOf(address(Owner)) >= 3, "Must have 3*10^-18 LINK for pool creation!");
+        require(tokenObject.allowance(Owner,address(this)) >= 3, "Must allow 3 tokens from your wallet in the ERC20 contract!");
+        tokenObject.transferFrom(Owner, address(this), 3); //NEED TO APPROVE EVERY TIME BEFORE YOU SEND LINK FROM THE ERC20 CONTRACT!
+    }
 
     function CancelDAILimitOrder() public ContractOwnerCheck LimitOrderExists{
         payable(Owner).transfer(1); 
     }
-
-    // function CancelDAILimitOrder() public ContractOwnerCheck LimitOrderExists{
-    //     payable(Owner).transfer(1); 
-    // }
+    function CancelMATICLimitOrder() public ContractOwnerCheck LimitOrderExists{
+        tokenObject.transfer(msg.sender, 2); // 2 LINK from contract to user
+    }
 
     function SwapMATICforDAI() public payable ContractOwnerCheck {
         dexOrderBookDAI.swapMATICforDAI{value: 1}();
     }
-
-    function SwapDAIforMATIC() public payable ContractOwnerCheck {
+    function SwapDAIforMATIC() public ContractOwnerCheck {
         dexOrderBookDAI.swapDAIforMATIC();
     }
 
     function getMaticBalance() public view returns (uint) {
         return address(this).balance;
     }
-
     function getDAIBalance() public view returns (uint) {
         return tokenObject.balanceOf(address(this));
     }
