@@ -39,7 +39,7 @@ contract minerBonus is KeeperCompatibleInterface{
     function deposit() public payable senderIsOwner validDeposit {}
 
     function withdraw() public payable senderIsOwner contractFunded { 
-        payable(msg.sender).transfer(address(this).balance); 
+        payable(Owner).transfer(address(this).balance); 
     }
 
     function minerBonusEveryBlock() public newBlockCreated contractFunded {
